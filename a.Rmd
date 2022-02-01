@@ -1,0 +1,343 @@
+---
+title: "BMI1"
+output:
+  word_document: default
+  pdf_document: default
+---
+```{r}
+library(readxl)
+rm(list=ls())
+
+D <- read.csv("C:/Users/vazol/Desktop/DTU/DTU/Introstat/bmi1/bmi1_data.csv",header = TRUE, sep=";",as.is=TRUE)
+```
+
+Descriptive analysis
+
+a) Write a short description of the data. Which variables are included in the dataset?
+Are the variables quantitative and/or categorized? (Categorized variables are only introduced in Chapter 8, but they are simply variables which divide the observations into categories/groups - e.g. three categories: low, medium, and high).How many observations are there? Are there any missing values? Remember to consult the extended description of the variables in Appendix 1 (p. 11).
+
+```{r}
+dim(D)
+```
+```{r}
+names(D)
+
+```
+```{r}
+head(D)
+
+```
+```{r}
+tail(D)
+
+```
+```{r}
+summary(D)
+```
+```{r}
+str(D)
+```
+
+```{r}
+D$bmi <- D$weight/(D$height/100)^2
+```
+
+b) Make a density histogram of the BMI scores. Use this histogram to describe the empirical distribution of the BMI scores. Is the empirical density symmetrical or skewed? Can a BMI score be negative? Is there much variation to be seen in the observations?
+
+
+```{r}
+mini=floor(min(D$bmi))
+a=mini%%5
+while (a!=0) {
+  if(a==0){
+    mini=mini
+  }else{
+    mini=mini-1
+    a=mini%%5
+  }
+}
+
+maxi=ceiling(max(D$bmi))
+a=maxi%%5
+while (a!=0) {
+  if(a==0){
+    maxi=maxi
+  }else{
+    maxi=maxi+1
+    a=maxi%%5
+  }
+}
+
+
+hist(D$bmi, xlab="BMI",main = "Histogram of: BMI",col=7,prob=TRUE,xlim=c(mini,maxi))
+```
+
+```{r}
+Dfemale <- subset(D, gender == 0)
+Dmale <- subset(D, gender == 1)
+```
+
+c) Make separate density histograms for the BMI scores of women and men, re-
+spectively. Describe the empirical distributions of the BMI scores for men and
+women using these histograms, like in the previous question. Does there seem
+to be a gender difference in the distribution of the BMI scores (if so, describe the
+difference)?
+
+```{r}
+mini=floor(min(Dfemale$bmi))
+a=mini%%5
+while (a!=0) {
+  if(a==0){
+    mini=mini
+  }else{
+    mini=mini-1
+    a=mini%%5
+  }
+}
+
+maxi=ceiling(max(Dfemale$bmi))
+a=maxi%%5
+while (a!=0) {
+  if(a==0){
+    maxi=maxi
+  }else{
+    maxi=maxi+1
+    a=maxi%%5
+  }
+}
+
+
+hist(Dfemale$bmi, xlab="BMI (female)", prob=TRUE,col=2,main ="Histogram of: BMI Female", xlim=c(mini,maxi))
+```
+
+
+```{r}
+mini=floor(min(Dmale$bmi))
+a=mini%%5
+while (a!=0) {
+  if(a==0){
+    mini=mini
+  }else{
+    mini=mini-1
+    a=mini%%5
+  }
+}
+
+maxi=ceiling(max(Dmale$bmi))
+a=maxi%%5
+while (a!=0) {
+  if(a==0){
+    maxi=maxi
+  }else{
+    maxi=maxi+1
+    a=maxi%%5
+  }
+}
+
+hist(Dmale$bmi, xlab="BMI (male)", prob=TRUE,col=4,main ="Histogram of: BMI Male", xlim=c(mini,maxi))
+```
+
+d) Make a box plot of the BMI scores by gender. Use this plot to describe the em-
+pirical distribution of the BMI scores for women and men. Are the distributions
+symmetrical or skewed? Does there seem to be a difference between the distribu-
+tions (if so, describe the difference)? Are there extreme observations/outliers?
+
+```{r}
+boxplot(Dfemale$bmi, Dmale$bmi,col = c(2,4), names=c("Female", "Male"), xlab="Gender", ylab="BMI")
+```
+
+e) Fill in the empty cells in the table above by computing the relevant summary
+statistics for BMI, first for the full sample (both genders combined), then separately for women and men. Which additional information may be gained from
+the table, compared to the box plot?
+
+```{r}
+table=matrix(c(sum(!is.na(D$bmi)),mean(D$bmi,na.rm=TRUE),var(D$bmi,na.rm=TRUE),sd(D$bmi,na.rm=TRUE),quantile(D$bmi,na.rm=TRUE,probs=0.25),quantile(D$bmi,na.rm=TRUE,probs=0.5),quantile(D$bmi,na.rm=TRUE,probs=0.75),sum(!is.na(Dfemale$bmi)),mean(Dfemale$bmi,na.rm=TRUE),var(Dfemale$bmi,na.rm=TRUE),sd(Dfemale$bmi, na.rm=TRUE),quantile(Dfemale$bmi,na.rm=TRUE,probs=0.25),quantile(Dfemale$bmi,na.rm=TRUE,probs=0.5),quantile(Dfemale$bmi,na.rm=TRUE,probs=0.75),sum(!is.na(Dmale$bmi)),mean(Dmale$bmi, na.rm=TRUE),var(Dmale$bmi, na.rm=TRUE),sd(Dmale$bmi, na.rm=TRUE),quantile(Dmale$bmi,na.rm=TRUE,probs=0.25),quantile(Dmale$bmi,na.rm=TRUE,probs=0.5),quantile(Dmale$bmi,na.rm=TRUE,probs=0.75)),ncol=7,byrow = TRUE)
+#options("scipen"=100, "digits"=3)
+colnames(table)=c('Number of obs.','Sample mean','Sample variance','Sample std. dev.','Lower quartile','Median','Upper Quartile')
+rownames(table)=c('Everyone','Women','Men')
+table=as.table(table)
+table
+table=as.data.frame.matrix(table)
+```
+
+Statistical analysis
+
+f) Specify a statistical model for log-transformed BMI, making no distinction be-
+tween men and women (see Remark 3.2). Estimate the parameters of the model
+(mean and standard deviation). Perform model validation (see Chapter 3 and
+Section 3.1.8). Since, in this case, confidence intervals and hypothesis tests in-
+volve the distribution of an average, it might also be useful to include the central
+limit theorem (Theorem 3.14) in the discussion.
+
+```{r}
+D$logbmi <- log(D$bmi)
+qqnorm(D$logbmi)
+qqline(D$logbmi)
+alpha=mean(D$logbmi)
+beta=sd(D$logbmi)
+meanBMI=exp(alpha+beta**2/2)
+sdBMI=exp(2*alpha+beta**2)*(exp(beta**2)-1)
+
+plot(ecdf(D$logbmi), verticals = TRUE,main='ecdf:BMI')
+xseq <- seq(0.9*min(D$logbmi), 1.1*max(D$logbmi), length.out = 100)
+lines(xseq, pnorm(xseq, mean(D$logbmi), sd(D$logbmi)),col=2)
+
+par(mfrow = c(3, 3))
+for (i in 1:9){
+xr <- rnorm(145)
+qqnorm(xr, main="")
+qqline(xr)
+}
+
+```
+
+g) State the formula for a 95% confidence interval (CI) for the mean log-transformed
+BMI score of the population (see Section 3.1.2). Insert values and calculate the
+interval. Then, determine a 95% CI for the median BMI score of the population
+(see Section 3.1.9).
+
+```{r}
+t95=qt(0.975,144)
+meanBMI-(sqrt(sdBMI)/sqrt(length(D$logbmi)))*t95
+meanBMI+(sqrt(sdBMI)/sqrt(length(D$logbmi)))*t95
+
+t.test(exp(D$logbmi))
+```
+
+
+h) Perform a hypothesis test in order to investigate whether the mean log-transformed
+BMI score is different from log(25). This can be done by testing the following
+hypothesis, and corresponds to investigating whether the median BMI score is
+different from 25:
+
+```{r}
+H0=log(25)
+n=length(D$logbmi)
+tobs=(mean(D$logbmi)-H0)/(sd(D$logbmi)/sqrt(n))
+pvalue <- 2 * (1-pt(abs(tobs), df=n-1))
+a=pt(abs(tobs), df=n-1)
+pvalue
+
+t.test(D$logbmi,mu=log(25))
+```
+
+i) Specify separate statistical models for log-transformed BMI for men and women.
+Perform model validation for both models. Estimate the parameters of the models (mean and standard deviation for men and women, respectively).
+
+```{r}
+Dmale$logbmi <- log(Dmale$bmi)
+qqnorm(Dmale$logbmi)
+qqline(Dmale$logbmi)
+alpham=mean(Dmale$logbmi)
+betam=sd(Dmale$logbmi)
+meanm=exp(alpham+betam**2/2)
+sdm=exp(2*alpham+betam**2)*(exp(betam**2)-1)
+
+plot(ecdf(Dmale$logbmi), verticals = TRUE,main='ecdf:BMI Male')
+xseq <- seq(0.9*min(Dmale$logbmi), 1.1*max(Dmale$logbmi), length.out = 100)
+lines(xseq, pnorm(xseq, mean(Dmale$logbmi), sd(Dmale$logbmi)),col=2)
+
+par(mfrow = c(3, 3))
+for (i in 1:9){
+xr <- rnorm(73)
+qqnorm(xr, main="")
+qqline(xr)
+}
+
+```
+
+```{r}
+Dfemale$logbmi <- log(Dfemale$bmi)
+qqnorm(Dfemale$logbmi)
+qqline(Dfemale$logbmi)
+alphaf=mean(Dfemale$logbmi)
+betaf=sd(Dfemale$logbmi)
+meanf=exp(alphaf+betaf**2/2)
+sdf=exp(2*alphaf+betaf**2)*(exp(betaf**2)-1)
+
+plot(ecdf(Dfemale$logbmi), verticals = TRUE,main='ecdf:BMI Female')
+xseq <- seq(0.9*min(Dfemale$logbmi), 1.1*max(Dfemale$logbmi), length.out = 100)
+lines(xseq, pnorm(xseq, mean(Dfemale$logbmi), sd(Dfemale$logbmi)),col=2)
+
+par(mfrow = c(3, 3))
+for (i in 1:9){
+xr <- rnorm(74)
+qqnorm(xr, main="")
+qqline(xr)
+}
+```
+
+j) Calculate 95% confidence intervals for the mean log-transformed BMI score for
+women and men, respectively (se Section 3.1.2). Use these to determine 95%
+confidence intervals for the median BMI score of women and men, respectively.
+Fill in the table below with the confidence intervals for the two medians.
+
+```{r}
+t95f=qt(0.975,71)
+t95m=qt(0.975,72)
+
+table1=matrix(c(meanf-(sqrt(sdf)/sqrt(length(Dfemale$logbmi)))*t95f,meanm-(sqrt(sdm)/sqrt(length(Dmale$logbmi)))*t95m,meanf+(sqrt(sdf)/sqrt(length(Dfemale$logbmi)))*t95f,meanm+(sqrt(sdm)/sqrt(length(Dmale$logbmi)))*t95m),ncol=2,byrow = TRUE)
+colnames(table1)=c('Lower bound of CI','Upper bound of CI')
+rownames(table1)=c('Women','Men')
+table1=as.table(table1)
+table1
+table1=as.data.frame.matrix(table1)
+```
+
+```{r}
+Dfemale <- subset(D, gender == 0)
+KI <- t.test(Dfemale$logbmi, conf.level=0.95)$conf.int
+KI
+exp(KI)
+```
+
+k) Perform a hypothesis test in order to investigate whether there is a difference
+between the BMI of women and men. Specify the hypothesis as well as the significance level α, the formula for the test statistic, and the distribution of the test
+statistic (remember the degrees of freedom). Insert relevant values and compute
+the test statistic and p-value. Write a conclusion in words.
+
+```{r}
+mean1=mean(D$logbmi[D$gender==0])
+mean2=mean(D$logbmi[D$gender==1])
+H01=0
+n1=length(D$logbmi[D$gender==0])
+n2=length(D$logbmi[D$gender==1])
+sd1=sd(D$logbmi[D$gender==0])
+sd2=sd(D$logbmi[D$gender==1])
+sd1=sd1**2
+sd2=sd2**2
+tobs1=((mean1-mean2)-H01)/sqrt(sd1/n1+sd2/n2)
+v=((sd1/n1+sd2/n2)**2)/((sd1/n1)**2/(n1-1)+((sd2/n2)**2)/(n2-1))
+pvalue1 <- 2 * (1-pt(abs(tobs1), df=v))
+pvalue1
+```
+
+```{r}
+t.test(D$logbmi[D$gender == 0], D$logbmi[D$gender == 1])
+```
+
+
+l) Comment on whether it was necessary to carry out the hypothesis test in the
+previous question, or if the same conclusion could have been drawn from the
+confidence intervals alone? (See Remark 3.59).
+
+Correlation
+
+m) State the formula for computing the correlation between BMI and weight. Insert
+values and calculate the correlation (note, insert only numbers in the correlation
+formula, i.e. three numbers). Furthermore, compute the remaining pairwise cor-
+relations involving BMI, weight and fast food. Make pairwise scatter plots of
+these variables. Assess whether the relation between the plots and the correlations is as you would expect.
+
+```{r}
+mean((D$weight-mean(D$weight))*(D$bmi-mean(D$bmi)))/(sd(D$weight)*sd(D$bmi))
+cor(D$weight,D$bmi)
+plot(x = D$weight,y = D$bmi,main = 'Correalations Weight-BMI',xlab = 'Weight',ylab = 'BMI',col='green')
+plot(x = D$fastfood,y = D$bmi,col='blue',main = 'Correalations Fastfood-BMI',xlab = 'Fastfood',ylab = 'BMI')
+plot(y = D$weight,x = D$fastfood,col='red',main = 'Correalations Weight-Fastfood',xlab = 'Weight',ylab = 'Fastfood')
+```
+
+```{r}
+cor(D[,c("weight","fastfood","bmi")], use="pairwise.complete.obs")
+```
+
